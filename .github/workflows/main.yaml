@@ -26,7 +26,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: "patch"
         RELEASE_BRANCHES: "main"
-    - name: Push image to GCR
+    - name: Build & push image to GCR
       run: |
         docker build . -t $DOCKER_IMAGE_GCR:${{ steps.version_bump.outputs.tag }}
         docker push $DOCKER_IMAGE_GCR:${{ steps.version_bump.outputs.tag }}
