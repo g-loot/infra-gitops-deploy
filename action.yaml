@@ -31,6 +31,6 @@ runs:
     - ${{ inputs.name }}
     - ${{ inputs.tag }}
     - ${{ inputs.image }}
-    - ${{ input.cluster_name }}
-    - ${{ input.cluster_zone }}
-    - ${{ input.cluster_project }}
+    - ${{ inputs.cluster_name }}
+    - ${{ inputs.cluster_zone }}
+    - ${{ inputs.cluster_project }}
