@@ -31,8 +31,7 @@ do
     echo "Deployed with tag: $tag"
     break;
   else
-    kubectl get deployment/$name -o yaml | grep 'image:' | xargs
-    kubectl rollout status deployment/$name
+    echo "Waiting for image..."
   fi
   sleep 2
 done
