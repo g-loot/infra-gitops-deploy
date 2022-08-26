@@ -26,7 +26,7 @@ gcloud container clusters get-credentials "$cluster_name" --zone "$cluster_zone"
 
 while true
 do
-  if [[ $(kubectl get deployment/$name -o yaml | grep $image | xargs) = "image: $image:$tag" ]] && [[ $(kubectl rollout status deployment/$name) = 'deployment "'$name'" successfully rolled out' ]]; then
+  if [[ $(kubectl get deployment/$name -o yaml | grep "image: $image" | xargs) = "image: $image:$tag" ]] && [[ $(kubectl rollout status deployment/$name) = 'deployment "'$name'" successfully rolled out' ]]; then
     kubectl rollout status deployment/$name
     echo "Deployed with tag: $tag"
     break;
