@@ -25,7 +25,7 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: 'docker://gcr.io/gloot-automation/infra-gitops-deploy:0.0.1-beta.5'
+  image: 'docker://gcr.io/gloot-automation/infra-gitops-deploy:0.0.3'
   args:
     - ${{ inputs.gcp_key }}
     - ${{ inputs.name }}
