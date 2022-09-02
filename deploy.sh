@@ -35,3 +35,5 @@ do
   fi
   sleep 2
 done
+
+python3 canary.py
