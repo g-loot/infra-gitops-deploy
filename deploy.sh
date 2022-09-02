@@ -36,4 +36,5 @@ do
   sleep 2
 done
 
+ls
 python3 canary.py

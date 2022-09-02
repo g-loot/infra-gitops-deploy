@@ -1,4 +1,5 @@
 import os
+import json
 import sys
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
@@ -29,26 +30,28 @@ with client.ApiClient() as api_client:
     resource_version_match = '' # str | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
     timeout_seconds = 56 # int | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
     watcha = True # bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. (optional)
-
+    name = "github-pipeline-service"
     w = watch.Watch()
     # for event in w.stream(api_instance.list_namespaced_custom_object,
     #                       group=group, version=version, plural=plural, namespace=namespace):
     #   #print(event["object"]["status"]["conditions"][0]["message"])
     #   #print(event["object"]["status"]["conditions"])
     #   print(json.dumps(event))
-    #for event in w.stream(api_instance_event.list_namespaced_event(namespace="default")):
-    #  #print(event["object"]["status"]["conditions"][0]["message"])
-    #  #print(event["object"]["status"]["conditions"])
-    #  print(json.dumps(event))
+    #print(json.dumps(api_instance.get_namespaced_custom_object_status(group, version, namespace, plural, name)))
+    #x = json.loads(api_instance.get_namespaced_custom_object_status(group, version, namespace, plural, name))
+    #if x["status"]["conditions"][0]["reason"] == "Succeeded":
+    #  print("x = true")
 
     for event in w.stream(api_instance_event.list_namespaced_event, namespace):
         #print(event["object"])
         #print("-----")
         if event["object"].involved_object.kind == "Canary" and event["object"].involved_object.name == "github-pipeline-service":
             print(event["object"].message)
-
             #if fail -> exit with error code
-
+            #if event["object"].message == "":
+            #    sys.exit(1)
             if event["object"].message == "Promotion completed! Scaling down github-pipeline-service.default":
-                sys.exit(0)
-                # later check custom resource and see if its actually succeeded
+                x = api_instance.get_namespaced_custom_object_status(group, version, namespace, plural, name)
+                if x["status"]["conditions"][0]["reason"] == "Succeeded":
+                  print("x = true")
+                  sys.exit(0)
