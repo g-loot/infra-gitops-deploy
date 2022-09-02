@@ -52,5 +52,5 @@ with client.ApiClient() as api_client:
             #if fail -> exit with error code
 
             if event["object"].message == "Promotion completed! Scaling down github-pipeline-service.default":
-                sys.exit(1)
+                sys.exit(0)
                 # later check custom resource and see if its actually succeeded
