@@ -1,6 +1,4 @@
-import json
 import os
-import schedule
 import sys
 from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
