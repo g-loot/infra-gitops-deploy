@@ -6,4 +6,4 @@ COPY src /src
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 WORKDIR /src
-ENTRYPOINT [ "./deploy.sh" ]
+ENTRYPOINT [ "/src/deploy.sh" ]
