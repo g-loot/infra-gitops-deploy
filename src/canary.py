@@ -57,13 +57,10 @@ with client.ApiClient() as api_client:
     #  print("x = true")
 
     for event in w.stream(api_instance_event.list_namespaced_event, namespace):
-        if ((script_start_time - timedelta(minutes=2)) < event["object"].last_timestamp
+        if ((script_start_time - timedelta(minutes=30)) < event["object"].last_timestamp
                 and event["object"].involved_object.kind == "Canary"
                 and event["object"].involved_object.name == "github-pipeline-service"
             ):
-            # if event["object"].involved_object.kind == "Canary" and event["object"].involved_object.name == "github-pipeline-service":
-            # print(event["object"])
-            # print("----------")
             print(event["object"].message, flush=True)
             # if fail -> exit with error code
             # I think we need to do the list_namespaced_custom_object and check for upcoming messeges aswell hmhm idk what to do here run them pararell?
@@ -72,3 +69,6 @@ with client.ApiClient() as api_client:
                     group, version, namespace, plural, name)
                 if x["status"]["conditions"][0]["reason"] == "Succeeded":
                     sys.exit(0)
+            elif "Rolling back github-pipeline-service.default progress deadline exceeded canary deployment" in event["object"].message:
+                print("Canary failed", flush=True)
+                sys.exit(1)
