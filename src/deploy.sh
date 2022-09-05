@@ -37,4 +37,4 @@ do
 done
 
 ls
-python3 canary.py
+python3 /infra-gitops-deploy/canary.py
