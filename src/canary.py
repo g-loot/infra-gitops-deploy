@@ -48,8 +48,7 @@ with client.ApiClient() as api_client:
         if event["object"].involved_object.kind == "Canary" and event["object"].involved_object.name == "github-pipeline-service":
             print(event["object"].message)
             #if fail -> exit with error code
-            #if event["object"].message == "":
-            #    sys.exit(1)
+            #I think we need to do the list_namespaced_custom_object and check for upcoming messeges aswell hmhm idk what to do here run them pararell?
             if event["object"].message == "Promotion completed! Scaling down github-pipeline-service.default":
                 x = api_instance.get_namespaced_custom_object_status(group, version, namespace, plural, name)
                 if x["status"]["conditions"][0]["reason"] == "Succeeded":
