@@ -36,5 +36,4 @@ do
   sleep 2
 done
 
-ls
 python3 /infra-gitops-deploy/canary.py

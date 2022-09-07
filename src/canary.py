@@ -29,17 +29,15 @@ def get_canary_status():
         version = 'v1beta1'  # str | The custom resource's version
         namespace = 'default'  # str | The custom resource's namespace
         plural = 'canaries'
-        w = watch.Watch()
-        for event in w.stream(api_instance.list_namespaced_custom_object,
-                              group=group, version=version, plural=plural, namespace=namespace):
+
+        for event in watch.Watch().stream(api_instance.list_namespaced_custom_object,
+                                          group=group, version=version, plural=plural, namespace=namespace):
             if ((script_start_time - timedelta(minutes=2)) < datetime.strptime(event["object"]["status"]["lastTransitionTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzutc())
-                        and event["object"]["metadata"]["name"] == "github-pipeline-service"
+                    and event["object"]["metadata"]["name"] == "github-pipeline-service"
                     ):
                 if event["object"]["status"]["phase"] == "Failed":
-                    print("Canary failed - status")
-                    sys.exit(1)
-                # else:
-                #    print("debug")
+                    print("Canary failed")
+                    os._exit(1)
 
 
 def get_canary_events():
@@ -51,30 +49,29 @@ def get_canary_events():
         namespace = 'default'  # str | The custom resource's namespace
         plural = 'canaries'
         name = "github-pipeline-service"
-        w = watch.Watch()
 
-        for event in w.stream(api_instance_event.list_namespaced_event, namespace):
+        for event in watch.Watch().stream(api_instance_event.list_namespaced_event, namespace):
             if ((script_start_time - timedelta(minutes=2)) < event["object"].last_timestamp
-                        and event["object"].involved_object.kind == "Canary"
-                        and event["object"].involved_object.name == "github-pipeline-service"
+                    and event["object"].involved_object.kind == "Canary"
+                    and event["object"].involved_object.name == "github-pipeline-service"
                     ):
                 print(event["object"].message, flush=True)
                 if event["object"].message == "Promotion completed! Scaling down github-pipeline-service.default":
                     event_canary = api_instance_custom_object.get_namespaced_custom_object_status(
                         group, version, namespace, plural, name)
                     if event_canary["object"]["status"]["phase"] == "Succeeded":
-                        sys.exit(0)
+                        print("Canary Succeeded", flush=True)
+                        os._exit(0)
                 elif "Rolling back github-pipeline-service.default progress deadline exceeded canary deployment" in event["object"].message:
                     # Canary failed! Scaling down github-pipeline-service.default
                     # I think we need to do the list_namespaced_custom_object and check for upcoming messeges aswell hmhm idk what to do here run them pararell?
                     print("Canary failed", flush=True)
-                    sys.exit(1)
+                    os._exit(1)
 
 
 t1 = threading.Thread(target=get_canary_status)
 t2 = threading.Thread(target=get_canary_events)
 
+
 t1.start()
 t2.start()
-
-# get_canary_status()
