@@ -9,11 +9,14 @@ cluster_name=$INPUT_CLUSTER_NAME
 cluster_zone=$INPUT_CLUSTER_ZONE
 cluster_project=$INPUT_CLUSTER_PROJECT
 
+namespace=$INPUT_NAMESPACE
 canary=$INPUT_CANARY
 
 echo "Tag: $tag"
 echo "Name: $name"
 echo "Image: $image"
+echo "Namespace: $INPUT_NAMESPACE"
+echo "Canary: $INPUT_CANARY"
 
 echo "Cluster name: $INPUT_CLUSTER_NAME"
 echo "Cluster zone: $INPUT_CLUSTER_ZONE"

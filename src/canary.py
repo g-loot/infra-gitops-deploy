@@ -1,16 +1,20 @@
-from concurrent.futures import thread
+"""Script to see see progress of canary deployments"""
 import os
-import json
-import sys
 import threading
 
-from kubernetes import client, config, watch
-from kubernetes.client.rest import ApiException
 from datetime import datetime, timezone, timedelta
+from kubernetes import client, config, watch
 from dateutil.tz import tzutc
 
 # Get current time
 script_start_time = datetime.now(timezone.utc).replace(tzinfo=tzutc())
+name = os.environ.get("INPUT_NAME")  # Custom resource's name
+namespace = os.environ.get("INPUT_NAMESPACE")  # Custom resource's namespace
+
+GROUP = 'flagger.app'  # Custom resource's group name
+VERSION = 'v1beta1'  # Custom resource's version
+PLURAL = 'canaries'  # Custom resource's plural name
+
 
 # Use the in_cluster_config when deploying to k8s
 if os.environ.get("ENV") == "DEV" or os.environ.get("ENV") == "PROD":
@@ -22,46 +26,34 @@ else:
 
 
 def get_canary_status():
+    """Get canary status. Exit program as sucess or failed depending if canary succeeds or fails"""
     with client.ApiClient() as api_client:
-        # Create an instance of the API class
         api_instance = client.CustomObjectsApi(api_client)
-        group = 'flagger.app'  # str | The custom resource's group name
-        version = 'v1beta1'  # str | The custom resource's version
-        namespace = 'default'  # str | The custom resource's namespace
-        plural = 'canaries'
 
         for event in watch.Watch().stream(api_instance.list_namespaced_custom_object,
-                                          group=group, version=version, plural=plural, namespace=namespace):
-            if ((script_start_time - timedelta(minutes=45)) < datetime.strptime(event["object"]["status"]["lastTransitionTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzutc())
-                    and event["object"]["metadata"]["name"] == "github-pipeline-service"
+                                          group=GROUP, version=VERSION, plural=PLURAL, namespace=namespace):
+            if ((script_start_time - timedelta(minutes=2)) < datetime.strptime(event["object"]["status"]["lastTransitionTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzutc())
+                    and event["object"]["metadata"]["name"] == name
                     ):
                 if event["object"]["status"]["phase"] == "Failed":
                     print("Canary failed", flush=True)
                     os._exit(1)
+                elif event["object"]["status"]["phase"] == "Succeeded":
+                    print("Canary succeeded", flush=True)
+                    os._exit(0)
 
 
 def get_canary_events():
+    """Print canary events messages"""
     with client.ApiClient() as api_client:
-        api_instance_custom_object = client.CustomObjectsApi(api_client)
         api_instance_event = client.CoreV1Api(api_client)
-        group = 'flagger.app'  # str | The custom resource's group name
-        version = 'v1beta1'  # str | The custom resource's version
-        namespace = 'default'  # str | The custom resource's namespace
-        plural = 'canaries'
-        name = "github-pipeline-service"
 
         for event in watch.Watch().stream(api_instance_event.list_namespaced_event, namespace):
-            if ((script_start_time - timedelta(minutes=45)) < event["object"].last_timestamp
+            if ((script_start_time - timedelta(minutes=2)) < event["object"].last_timestamp
                     and event["object"].involved_object.kind == "Canary"
-                    and event["object"].involved_object.name == "github-pipeline-service"
+                    and event["object"].involved_object.name == name
                     ):
                 print(event["object"].message, flush=True)
-                if event["object"].message == "Promotion completed! Scaling down github-pipeline-service.default":
-                    event_canary = api_instance_custom_object.get_namespaced_custom_object_status(
-                        group, version, namespace, plural, name)
-                    if event_canary["object"]["status"]["phase"] == "Succeeded":
-                        print("Canary Succeeded", flush=True)
-                        os._exit(0)
 
 
 t1 = threading.Thread(target=get_canary_status)

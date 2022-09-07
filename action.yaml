@@ -3,29 +3,33 @@ description: "Deploy Progress"
 author: "Philip Sabri"
 inputs:
   gcp_key:
-    description: "desc"
+    description: "GCP Service account key"
     required: true
   name:
-    description: "desc"
+    description: "Name of serivce"
     required: true
   tag:
-    description: "desc"
+    description: "Image tag"
     required: true
   image:
-    description: "desc"
+    description: "Full image name with registry"
     required: true
   cluster_name:
-    description: "desc"
+    description: "Name of the cluster"
     required: true
   cluster_zone:
-    description: "desc"
+    description: "Name of the zone the cluster is deployed to"
     required: true
   cluster_project:
-    description: "desc"
+    description: "Name of the project the cluster is deployed to"
+    required: true
+  namespace:
+    default: "default"
+    description: "Namespace of service"
     required: true
   canary:
     default: "false"
-    description: "desc"
+    description: "Set to true if canary deployments are used"
     required: true
 runs:
   using: "docker"
@@ -38,4 +42,5 @@ runs:
     - ${{ inputs.cluster_name }}
     - ${{ inputs.cluster_zone }}
     - ${{ inputs.cluster_project }}
+    - ${{ inputs.namespace }}
     - ${{ inputs.canary }}
