@@ -1,31 +1,35 @@
-name: 'Deploy progress'
-description: 'Deploy Progress'
-author: 'Philip Sabri'
+name: "Deploy progress"
+description: "Deploy Progress"
+author: "Philip Sabri"
 inputs:
   gcp_key:
-    description: 'desc'
+    description: "desc"
     required: true
   name:
-    description: 'desc'
+    description: "desc"
     required: true
   tag:
-    description: 'desc'
+    description: "desc"
     required: true
   image:
-    description: 'desc'
+    description: "desc"
     required: true
   cluster_name:
-    description: 'desc'
+    description: "desc"
     required: true
   cluster_zone:
-    description: 'desc'
+    description: "desc"
     required: true
   cluster_project:
-    description: 'desc'
+    description: "desc"
+    required: true
+  canary:
+    default: "false"
+    description: "desc"
     required: true
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "Dockerfile"
   args:
     - ${{ inputs.gcp_key }}
     - ${{ inputs.name }}
@@ -34,3 +38,4 @@ runs:
     - ${{ inputs.cluster_name }}
     - ${{ inputs.cluster_zone }}
     - ${{ inputs.cluster_project }}
+    - ${{ inputs.canary }}

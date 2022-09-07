@@ -9,6 +9,8 @@ cluster_name=$INPUT_CLUSTER_NAME
 cluster_zone=$INPUT_CLUSTER_ZONE
 cluster_project=$INPUT_CLUSTER_PROJECT
 
+canary=$INPUT_CANARY
+
 echo "Tag: $tag"
 echo "Name: $name"
 echo "Image: $image"
@@ -36,4 +38,7 @@ do
   sleep 2
 done
 
-python3 /infra-gitops-deploy/canary.py
+if $canary; then
+  echo "-----------CANARY STARTING-----------"
+  python3 /infra-gitops-deploy/canary.py
+fi
