@@ -32,11 +32,11 @@ def get_canary_status():
 
         for event in watch.Watch().stream(api_instance.list_namespaced_custom_object,
                                           group=group, version=version, plural=plural, namespace=namespace):
-            if ((script_start_time - timedelta(minutes=2)) < datetime.strptime(event["object"]["status"]["lastTransitionTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzutc())
+            if ((script_start_time - timedelta(minutes=45)) < datetime.strptime(event["object"]["status"]["lastTransitionTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzutc())
                     and event["object"]["metadata"]["name"] == "github-pipeline-service"
                     ):
                 if event["object"]["status"]["phase"] == "Failed":
-                    print("Canary failed")
+                    print("Canary failed", flush=True)
                     os._exit(1)
 
 
@@ -51,7 +51,7 @@ def get_canary_events():
         name = "github-pipeline-service"
 
         for event in watch.Watch().stream(api_instance_event.list_namespaced_event, namespace):
-            if ((script_start_time - timedelta(minutes=2)) < event["object"].last_timestamp
+            if ((script_start_time - timedelta(minutes=45)) < event["object"].last_timestamp
                     and event["object"].involved_object.kind == "Canary"
                     and event["object"].involved_object.name == "github-pipeline-service"
                     ):
@@ -62,16 +62,10 @@ def get_canary_events():
                     if event_canary["object"]["status"]["phase"] == "Succeeded":
                         print("Canary Succeeded", flush=True)
                         os._exit(0)
-                elif "Rolling back github-pipeline-service.default progress deadline exceeded canary deployment" in event["object"].message:
-                    # Canary failed! Scaling down github-pipeline-service.default
-                    # I think we need to do the list_namespaced_custom_object and check for upcoming messeges aswell hmhm idk what to do here run them pararell?
-                    print("Canary failed", flush=True)
-                    os._exit(1)
 
 
 t1 = threading.Thread(target=get_canary_status)
 t2 = threading.Thread(target=get_canary_events)
-
 
 t1.start()
 t2.start()
