@@ -32,6 +32,7 @@ def get_canary_status():
 
         for event in watch.Watch().stream(api_instance.list_namespaced_custom_object,
                                           group=GROUP, version=VERSION, plural=PLURAL, namespace=namespace):
+            # Check if the event is older than script_start_time minus 2 minutes to make sure we dont exit the script on old events
             if ((script_start_time - timedelta(minutes=2)) < datetime.strptime(event["object"]["status"]["lastTransitionTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tzutc())
                     and event["object"]["metadata"]["name"] == name
                     ):
@@ -47,7 +48,7 @@ def get_canary_events():
     """Print canary events messages"""
     with client.ApiClient() as api_client:
         api_instance_event = client.CoreV1Api(api_client)
-
+        # Check if the event is older than script_start_time minus 2 minutes to make sure we dont exit the script on old events
         for event in watch.Watch().stream(api_instance_event.list_namespaced_event, namespace):
             if ((script_start_time - timedelta(minutes=2)) < event["object"].last_timestamp
                     and event["object"].involved_object.kind == "Canary"
