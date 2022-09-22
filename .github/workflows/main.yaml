@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and push docker image
     env:
-      DOCKER_IMAGE_GCR: eu.gcr.io/gloot-automation/infra-gitops-deploy
+      DOCKER_IMAGE_GCR: gcr.io/gloot-automation/infra-gitops-deploy
     steps:
     - name: Checkout
       uses: actions/checkout@v2
