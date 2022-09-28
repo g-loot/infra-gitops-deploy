@@ -22,13 +22,6 @@ echo "Cluster name: $INPUT_CLUSTER_NAME"
 echo "Cluster zone: $INPUT_CLUSTER_ZONE"
 echo "Cluster project: $INPUT_CLUSTER_PROJECT"
 
-#Auth to GCP
-echo "$INPUT_GCP_KEY" | base64 -d > /tmp/google_credentials.json
-gcloud auth activate-service-account --key-file /tmp/google_credentials.json
-
-#Choose cluster
-gcloud container clusters get-credentials "$cluster_name" --zone "$cluster_zone" --project "$cluster_project"
-
 while true
 do
   if [[ $(kubectl get deployment/$name -o yaml | grep "image: $image" | xargs) = "image: $image:$tag" ]] && [[ $(kubectl rollout status deployment/$name) = 'deployment "'$name'" successfully rolled out' ]]; then
