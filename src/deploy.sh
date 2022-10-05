@@ -10,13 +10,11 @@ cluster_zone=$INPUT_CLUSTER_ZONE
 cluster_project=$INPUT_CLUSTER_PROJECT
 
 namespace=$INPUT_NAMESPACE
-canary=$INPUT_CANARY
 
 echo "Tag: $tag"
 echo "Name: $name"
 echo "Image: $image"
 echo "Namespace: $INPUT_NAMESPACE"
-echo "Canary: $INPUT_CANARY"
 
 echo "Cluster name: $INPUT_CLUSTER_NAME"
 echo "Cluster zone: $INPUT_CLUSTER_ZONE"
@@ -41,7 +39,7 @@ do
   sleep 2
 done
 
-if $canary; then
+if [[ $(kubectl get canary $name 2> /dev/null) ]];then
   echo "-----------CANARY STARTING-----------"
   python3 /infra-gitops-deploy/canary.py
 fi
